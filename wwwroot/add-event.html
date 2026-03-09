@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event – Eventify</title>
+
+    <!-- NHS Frontend CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/nhsuk-frontend@9.3.0/dist/nhsuk.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- NHS fonts -->
+    <link rel="preload" href="https://assets.nhs.uk/fonts/FrutigerLTW01-55Roman.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://assets.nhs.uk/fonts/FrutigerLTW01-65Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Frutiger LT W01 55 Roman", Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* NHS banner */
+        header.nhs-banner {
+            background-color: #00a1e0;
+            padding: 0.5rem 0;
+        }
+
+        header.nhs-banner .nhsuk-width-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nhs-banner-logo {
+            height: 50px;
+        }
+
+        .banner-title {
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        nav.nhs-nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav.nhs-nav a {
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        nav.nhs-nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        h1.nhs-heading {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #005eb8;
+            text-align: center;
+        }
+
+        .nhs-button {
+            display: inline-block;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background-color: #005eb8;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nhs-button:hover {
+            background-color: #004a99;
+        }
+
+        form .nhs-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        form label.nhsuk-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        form input.nhsuk-input, form textarea.nhsuk-textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #b1b4b6;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #saveMessage {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        footer {
+            margin-top: 60px;
+            background-color: #f3f3f3;
+            padding: 20px 0;
+            text-align: center;
+            color: #212121;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NHS-style top banner with logo and navigation -->
+    <header class="nhs-banner" role="banner">
+        <div class="nhsuk-width-container">
+            <div style="display: flex; align-items: center;">
+                <img src="https://assets.nhs.uk/images/nhs-logo.png" alt="NHS Logo" class="nhs-banner-logo">
+                <h1 class="banner-title">Eventify (Cardiff)</h1>
+            </div>
+
+            <nav class="nhs-nav">
+                <a href="index.html">Home</a>
+                <a href="events.html">Events</a>
+                <a href="add-event.html" aria-current="page">Create event</a>
+                <a href="about.html">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main>
+        <h1 class="nhs-heading">Create an event</h1>
+
+        <form id="addEventForm">
+            <div class="nhs-form-group">
+                <label class="nhsuk-label" for="title">Event Title</label>
+                <input class="nhsuk-input" id="title" name="title" type="text" required>
+            </div>
+
+            <div class="nhs-form-group">
+                <label class="nhsuk-label" for="date">Date</label>
+                <input class="nhsuk-input" id="date" name="date" type="date" required>
+            </div>
+
+            <div class="nhs-form-group">
+                <label class="nhsuk-label" for="location">Location</label>
+                <input class="nhsuk-input" id="location" name="location" type="text" required>
+            </div>
+
+            <div class="nhs-form-group">
+                <label class="nhsuk-label" for="description">Description</label>
+                <textarea class="nhsuk-textarea" id="description" name="description"></textarea>
+            </div>
+
+            <button class="nhs-button" type="submit">Save Event</button>
+        </form>
+
+        <p id="saveMessage"></p>
+    </main>
+
+    <footer>
+        &copy; 2026 Eventify. All rights reserved.
+    </footer>
+
+    <script>
+        const form = document.getElementById('addEventForm');
+        const msg = document.getElementById('saveMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const eventData = {
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                location: document.getElementById('location').value,
+                description: document.getElementById('description').value
+            };
+
+            const response = await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+
+            if (response.ok) {
+                msg.textContent = 'Event saved successfully.';
+                form.reset();
+            } else {
+                msg.textContent = 'There was an error saving the event.';
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventify</title>
+
+    <!-- NHS Frontend CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/nhsuk-frontend@9.3.0/dist/nhsuk.min.css">
+    <link rel="stylesheet" href="styles.css"> <!-- Custom banner width -->
+
+    <!-- NHS fonts -->
+    <link rel="preload" href="https://assets.nhs.uk/fonts/FrutigerLTW01-55Roman.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://assets.nhs.uk/fonts/FrutigerLTW01-65Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Frutiger LT W01 55 Roman", Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* Main content */
+        main {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        h1.nhs-heading {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #005eb8;
+        }
+
+        p.nhs-lede {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+            color: #212121;
+        }
+
+        .nhs-button {
+            display: inline-block;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background-color: #005eb8;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nhs-button:hover {
+            background-color: #004a99;
+        }
+
+        .nhs-card-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 50px;
+            gap: 20px;
+        }
+
+        .nhs-card {
+            background-color: #f3f3f3;
+            width: 250px;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: left;
+            color: #212121;
+            text-decoration: none;
+            transition: box-shadow 0.3s;
+        }
+
+        .nhs-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .nhs-card h2 {
+            font-size: 1.2rem;
+            color: #005eb8;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .nhs-card p {
+            margin: 0;
+        }
+
+        footer {
+            margin-top: 60px;
+            background-color: #f3f3f3;
+            padding: 20px 0;
+            text-align: center;
+            color: #212121;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NHS-style top banner -->
+ <header class="nhs-banner" role="banner">
+    <div class="nhsuk-width-container banner-content">
+        <!-- NHS Logo on the left -->
+        <img src="https://assets.nhs.uk/images/nhs-logo.png" alt="NHS Logo" class="nhs-banner-logo">
+
+        <!-- Banner title -->
+        <h1 class="banner-title">Eventify (Cardiff)</h1>
+    </div>
+</header>
+
+    <!-- Main content -->
+    <main>
+        <h1 class="nhs-heading">Welcome to Eventify</h1>
+        <p class="nhs-lede">
+            Eventify is a simple and accessible platform to create, manage, and explore events within your health board, 
+            designed with NHS branding and accessibility in mind.
+        </p>
+
+        <a href="add-event.html" class="nhs-button">Create your first event</a>
+
+        <div class="nhs-card-group">
+            <a href="events.html" class="nhs-card">
+                <h2>View events</h2>
+                <p>Browse upcoming and past events easily.</p>
+            </a>
+
+            <a href="add-event.html" class="nhs-card">
+                <h2>Create event</h2>
+                <p>Add a new event to share with your community.</p>
+            </a>
+
+            <a href="about.html" class="nhs-card">
+                <h2>About Eventify</h2>
+                <p>Learn more about our platform and accessibility features.</p>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2026 Eventify. All rights reserved.
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+/* NHS banner background */
+header.nhs-banner {
+    background-color: #00a1e0;
+    padding: 0.5rem 0;
+}
+
+/* Make container wider and flex layout */
+header.nhs-banner .nhsuk-width-container {
+    max-width: 1400px; /* wider than default NHS container */
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+/* NHS logo styling */
+.nhs-banner-logo {
+    height: 50px; /* adjust as needed */
+    margin-right: 20px;
+}
+
+/* Banner title styling in NHS white */
+.banner-title {
+    color: #ffffff; /* NHS white */
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}

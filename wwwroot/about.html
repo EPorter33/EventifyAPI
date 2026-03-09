@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About – Eventify</title>
+
+    <!-- NHS Frontend CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/nhsuk-frontend@9.3.0/dist/nhsuk.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- NHS fonts -->
+    <link rel="preload" href="https://assets.nhs.uk/fonts/FrutigerLTW01-55Roman.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://assets.nhs.uk/fonts/FrutigerLTW01-65Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Frutiger LT W01 55 Roman", Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* NHS banner */
+        header.nhs-banner {
+            background-color: #00a1e0;
+            padding: 0.5rem 0;
+        }
+
+        header.nhs-banner .nhsuk-width-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nhs-banner-logo {
+            height: 50px;
+            margin-right: 20px;
+        }
+
+        .banner-title {
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Navigation links inside banner */
+        nav.nhs-nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav.nhs-nav a {
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        nav.nhs-nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        h1.nhs-heading, h2.nhs-heading-l {
+            color: #005eb8;
+        }
+
+        h1.nhs-heading {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h2.nhs-heading-l {
+            font-size: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p.nhs-body, p.nhs-lede {
+            font-size: 1.1rem;
+            color: #212121;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        footer {
+            margin-top: 60px;
+            background-color: #f3f3f3;
+            padding: 20px 0;
+            text-align: center;
+            color: #212121;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NHS-style top banner with logo and navigation -->
+    <header class="nhs-banner" role="banner">
+        <div class="nhsuk-width-container">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img src="https://assets.nhs.uk/images/nhs-logo.png" alt="NHS Logo" class="nhs-banner-logo">
+                <h1 class="banner-title">Eventify (Cardiff)</h1>
+            </div>
+
+            <nav class="nhs-nav">
+                <a href="index.html">Home</a>
+                <a href="events.html">Events</a>
+                <a href="add-event.html">Create event</a>
+                <a href="about.html" aria-current="page">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main>
+        <h1 class="nhs-heading">About Eventify</h1>
+
+        <p class="nhs-body">
+            Eventify is a simple and intuitive platform designed to help users create, manage, and explore events across 
+            your health authority in the NHS. It demonstrates a full-stack implementation using .NET 10, PostgreSQL, 
+            and modern front-end design principles.
+        </p>
+
+        <h2 class="nhs-heading-l">About the Developer</h2>
+
+        <p class="nhs-body">
+            This project was developed by Elizabeth Porter, focused on full‑stack web
+            development. It showcases skills in systems analysis, database integration, API development, and
+            user‑centred design using the NHS.UK Frontend for accessibility and professional styling.
+        </p>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2026 Eventify. All rights reserved.
+    </footer>
+
+</body>
+</html>

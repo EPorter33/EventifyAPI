@@ -176,16 +176,24 @@
                 return;
             }
 
-            events.forEach(ev => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${ev.title}</td>
-                    <td>${ev.date}</td>
-                    <td>${ev.location}</td>
-                    <td>${ev.description || ''}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+           events.forEach(ev => {
+    const tr = document.createElement('tr');
+
+    // Convert date to DD/MM/YYYY
+    const eventDate = new Date(ev.date); // JS Date object
+    const day = String(eventDate.getDate()).padStart(2, '0');
+    const month = String(eventDate.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+    const year = eventDate.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
+
+    tr.innerHTML = `
+        <td>${ev.title}</td>
+        <td>${formattedDate}</td>
+        <td>${ev.location}</td>
+        <td>${ev.description || ''}</td>
+    `;
+    tbody.appendChild(tr);
+}); 
         }
 
         loadEvents();

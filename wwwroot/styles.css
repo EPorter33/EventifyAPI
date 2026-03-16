@@ -25,3 +25,40 @@ header.nhs-banner .nhsuk-width-container {
     font-weight: 600;
     margin: 0;
 }
+/* Body with background image */
+.home-background {
+    background-image: url("/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Hero container */
+.hero-container {
+    max-width: 960px; /* 960 Grid */
+    margin: 0 auto;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Hero text aligned to Rule of Thirds */
+.hero-text {
+    text-align: left; /* Slightly left for Rule of Thirds */
+    margin-bottom: 40px;
+}
+
+/* Cards spacing (NHS card group styling) */
+.nhs-card-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* Optional: semi-transparent overlay on hero text */
+.hero-text h1, .hero-text p {
+    background-color: rgba(255,255,255,0.85);
+    padding: 10px;
+    border-radius: 6px;
+}

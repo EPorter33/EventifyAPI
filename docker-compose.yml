@@ -21,5 +21,4 @@ services:
       MSSQL_SA_PASSWORD: "YourStrongPassword123!"
     ports:
       - "1433:1433"
-    volumes:
-      - ./db_data:/var/opt/mssql
+    

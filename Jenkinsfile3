@@ -1,6 +1,12 @@
 pipeline {
     agent any
     options { skipDefaultCheckout(true) }
+    environment {
+    IMAGE_REPO = 'ejporter/eventifyapi'
+    DOCKERHUB_CREDENTIALS = credentials('DockerHub')
+    DOCKERHUB_USERNAME = 'ejporter'
+}
+
     stages {
         stage('Checkout') {
             steps {

@@ -4,7 +4,7 @@ pipeline {
     
     environment {
         IMAGE_REPO = 'ejporter/eventifyapi'
-        DOCKERHUB_CREDENTIALS = credentials('DockerHub')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKERHUB_USERNAME = 'ejporter'
     }
 
@@ -121,14 +121,20 @@ pipeline {
 
     post {
         always {
-            dir('ci-runtime') {
-                sh '''
-                    docker compose ps -a || true
-                    docker compose logs --tail=20 db || true
-                    docker compose down --remove-orphans || true
-                    docker image rm "$IMAGE_REPO:latest" || true
-                    docker builder prune -f || true
-                '''
+            script {
+                if (fileExists('ci-runtime')) {
+                    dir('ci-runtime') {
+                        sh '''
+                            docker compose ps -a || true
+                            docker compose logs --tail=20 db || true
+                            docker compose down --remove-orphans || true
+                            docker image rm "$IMAGE_REPO:latest" || true
+                            docker builder prune -f || true
+                        '''
+                    }
+                } else {
+                    sh 'docker image rm "$IMAGE_REPO:latest" || true'
+                }
             }
         }
         success { echo 'Task 1 CI checks passed.' }

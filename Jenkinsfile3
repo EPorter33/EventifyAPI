@@ -24,10 +24,10 @@ pipeline {
                     mkdir -p ci-runtime
                     cp ci-source/Dockerfile ci-runtime/
                     cp ci-source/docker-compose.yml ci-runtime/
-                    cp -r ci-source/. ci-runtime/
+                    tar --exclude='.git' -C ci-source -c . | tar -C ci-runtime -x
                 '''
-            }
-        }
+    }
+}
         stage('Build') {
             steps {
                 dir('ci-runtime') {

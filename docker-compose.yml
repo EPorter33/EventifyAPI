@@ -1,23 +1,18 @@
-name: eventify
+version: '3.8'
 
 services:
-  eventifyapi:
-    build: .
-    container_name: eventifyapi
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: my-jenkins
+    restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "8080:8080"
+      - "50000:50000"
     volumes:
-      - .:/app
-    depends_on:
-      - db
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jenkins_home:/var/jenkins_home
     environment:
-      ConnectionStrings__DefaultConnection: "Server=db;Database=EventifyDB;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+      - DOCKER_HOST=unix:///var/run/docker.sock
 
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: eventifydb
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "YourStrongPassword123!"
-    ports:
-      - "1433:1433"
+volumes:
+  jenkins_home:

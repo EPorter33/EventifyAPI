@@ -1,12 +1,21 @@
 pipeline {
     agent any
     options { skipDefaultCheckout(true) }
+    
+    environment {
+        IMAGE_REPO = 'ejporter/eventifyapi'
+        DOCKERHUB_CREDENTIALS = credentials('DockerHub')
+        DOCKERHUB_USERNAME = 'ejporter'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                 echo 'Downloading latest code from GitHub'
-              dir('ci-source') 
-             { checkout scm } }
+                echo 'Downloading latest code from GitHub'
+                dir('ci-source') { 
+                    checkout scm 
+                } 
+            }
         }
         stage('Prepare') {
             steps {
@@ -42,7 +51,7 @@ pipeline {
                 echo 'Testing PHP syntax'
                 dir('ci-runtime') {
                     sh 'docker compose exec -T webphp php -l index.php'
-                echo 'Testing PHP web application'
+                    echo 'Testing PHP web application'
                     sh '''
                         for i in $(seq 1 20); do
                             if docker compose exec -T webphp php -r \
@@ -52,45 +61,64 @@ pipeline {
                                 break
                             fi
                             if [ "$i" -eq 20 ]; then
-                                 echo "Web application test failed"
-                                 exit 1
+                                echo "Web application test failed"
+                                exit 1
                             fi
-    
                             sleep 3
                         done
-                        
                     '''
-                          echo 'Testing MySQL database'
-sh '''
-                for i in $(seq 1 20); do
+                    echo 'Testing MySQL database'
+                    sh '''
+                        for i in $(seq 1 20); do
+                            if docker compose exec -T db sh -c \
+                            'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D docker_database -Nse "SELECT 1"'
+                            then
+                                echo "MySQL database test passed"
+                                exit 0
+                            fi
 
-                    if docker compose exec -T db sh -c \
-                    'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D docker_database -Nse "SELECT 1"'
-                    then
-                        echo "MySQL database test passed"
-                        exit 0
-                    fi
+                            if ! docker compose ps -q \
+                                --status running db | grep -q .; then
+                                echo "MySQL container has stopped"
+                                docker compose logs --tail=50 db
+                                exit 1
+                            fi
 
-                    if ! docker compose ps -q \
-                        --status running db | grep -q .; then
-                        echo "MySQL container has stopped"
-                        docker compose logs --tail=50 db
-                        exit 1
-                    fi
+                            if [ "$i" -eq 20 ]; then
+                                echo "MySQL database test failed"
+                                docker compose logs --tail=50 db
+                                exit 1
+                            fi
 
-                    if [ "$i" -eq 20 ]; then
-                        echo "MySQL database test failed"
-                        docker compose logs --tail=50 db
-                        exit 1
-                    fi
+                            sleep 3
+                        done
+                    '''
+                }
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                dir('ci-runtime') {
+                    sh '''
+                        set +x
 
-                    sleep 3
-                done
-            '''
+                        IMAGE_ID=$(docker compose images -q webphp)
+                        test -n "$IMAGE_ID"
+
+                        docker tag "$IMAGE_ID" "$IMAGE_REPO:latest"
+
+                        echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login \
+                            -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
+
+                        docker push "$IMAGE_REPO:latest"
+
+                        docker logout
+                    '''
                 }
             }
         }
     }
+
     post {
         always {
             dir('ci-runtime') {
@@ -98,9 +126,10 @@ sh '''
                     docker compose ps -a || true
                     docker compose logs --tail=20 db || true
                     docker compose down --remove-orphans || true
+                    docker image rm "$IMAGE_REPO:latest" || true
                     docker builder prune -f || true
                 '''
-            }s
+            }
         }
         success { echo 'Task 1 CI checks passed.' }
         failure { echo 'Task 1 failed; inspect Console Output.' }

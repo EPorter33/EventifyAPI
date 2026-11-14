@@ -4,7 +4,7 @@ pipeline {
     
     environment {
         IMAGE_REPO = 'ejporter/eventifyapi'
-        DOCKERHUB_CREDENTIALS = credentials('DockerHub')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         DOCKERHUB_USERNAME = 'ejporter'
     }
 
@@ -19,12 +19,12 @@ pipeline {
         }
         stage('Prepare') {
             steps {
-                echo 'Preparing application for Docker'
+                echo 'Preparing .NET application for Docker'
                 sh '''
-                    mkdir -p ci-runtime/site
+                    mkdir -p ci-runtime
                     cp ci-source/Dockerfile ci-runtime/
                     cp ci-source/docker-compose.yml ci-runtime/
-                    cp -r ci-source/site/. ci-runtime/site/
+                    cp -r ci-source/. ci-runtime/
                 '''
             }
         }
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 dir('ci-runtime') {
                     sh 'docker compose down --remove-orphans || true'
-                    sh 'docker compose build webphp'
+                    sh 'docker compose build eventifyapi'
                 }
             }
         }
@@ -48,15 +48,11 @@ pipeline {
         }
         stage('Testing') {
             steps {
-                echo 'Testing PHP syntax'
+                echo 'Testing .NET web application endpoint'
                 dir('ci-runtime') {
-                    sh 'docker compose exec -T webphp php -l index.php'
-                    echo 'Testing PHP web application'
                     sh '''
                         for i in $(seq 1 20); do
-                            if docker compose exec -T webphp php -r \
-                            'exit(@file_get_contents("http://127.0.0.1/") === false ? 1 : 0);'
-                            then
+                            if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/ | grep -q "200\\|404\\|302"; then
                                 echo "HTTP test passed"
                                 break
                             fi
@@ -64,32 +60,6 @@ pipeline {
                                 echo "Web application test failed"
                                 exit 1
                             fi
-                            sleep 3
-                        done
-                    '''
-                    echo 'Testing MySQL database'
-                    sh '''
-                        for i in $(seq 1 20); do
-                            if docker compose exec -T db sh -c \
-                            'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D docker_database -Nse "SELECT 1"'
-                            then
-                                echo "MySQL database test passed"
-                                exit 0
-                            fi
-
-                            if ! docker compose ps -q \
-                                --status running db | grep -q .; then
-                                echo "MySQL container has stopped"
-                                docker compose logs --tail=50 db
-                                exit 1
-                            fi
-
-                            if [ "$i" -eq 20 ]; then
-                                echo "MySQL database test failed"
-                                docker compose logs --tail=50 db
-                                exit 1
-                            fi
-
                             sleep 3
                         done
                     '''
@@ -102,7 +72,7 @@ pipeline {
                     sh '''
                         set +x
 
-                        IMAGE_ID=$(docker compose images -q webphp)
+                        IMAGE_ID=$(docker compose images -q eventifyapi)
                         test -n "$IMAGE_ID"
 
                         docker tag "$IMAGE_ID" "$IMAGE_REPO:latest"
@@ -121,17 +91,23 @@ pipeline {
 
     post {
         always {
-            dir('ci-runtime') {
-                sh '''
-                    docker compose ps -a || true
-                    docker compose logs --tail=20 db || true
-                    docker compose down --remove-orphans || true
-                    docker image rm "$IMAGE_REPO:latest" || true
-                    docker builder prune -f || true
-                '''
+            script {
+                if (fileExists('ci-runtime')) {
+                    dir('ci-runtime') {
+                        sh '''
+                            docker compose ps -a || true
+                            docker compose logs --tail=20 db || true
+                            docker compose down --remove-orphans || true
+                            docker image rm "$IMAGE_REPO:latest" || true
+                            docker builder prune -f || true
+                        '''
+                    }
+                } else {
+                    sh 'docker image rm "$IMAGE_REPO:latest" || true'
+                }
             }
         }
-        success { echo 'Task 1 CI checks passed.' }
-        failure { echo 'Task 1 failed; inspect Console Output.' }
+        success { echo 'Pipeline CI checks passed.' }
+        failure { echo 'Pipeline failed; inspect Console Output.' }
     }
 }

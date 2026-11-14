@@ -26,8 +26,8 @@ pipeline {
                     cp ci-source/docker-compose.yml ci-runtime/
                     tar --exclude='.git' -C ci-source -c . | tar -C ci-runtime -x
                 '''
-    }
-}
+            }
+        }
         stage('Build') {
             steps {
                 dir('ci-runtime') {
@@ -91,19 +91,21 @@ pipeline {
 
     post {
         always {
-            script {
-                if (fileExists('ci-runtime')) {
-                    dir('ci-runtime') {
-                        sh '''
-                            docker compose ps -a || true
-                            docker compose logs --tail=20 db || true
-                            docker compose down --remove-orphans || true
-                            docker image rm "$IMAGE_REPO:latest" || true
-                            docker builder prune -f || true
-                        '''
+            node { // Restores the workspace node context for post-build cleanup
+                script {
+                    if (fileExists('ci-runtime')) {
+                        dir('ci-runtime') {
+                            sh '''
+                                docker compose ps -a || true
+                                docker compose logs --tail=20 db || true
+                                docker compose down --remove-orphans || true
+                                docker image rm "$IMAGE_REPO:latest" || true
+                                docker builder prune -f || true
+                            '''
+                        }
+                    } else {
+                        sh 'docker image rm "$IMAGE_REPO:latest" || true'
                     }
-                } else {
-                    sh 'docker image rm "$IMAGE_REPO:latest" || true'
                 }
             }
         }

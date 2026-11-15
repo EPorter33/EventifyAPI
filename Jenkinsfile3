@@ -91,23 +91,27 @@ pipeline {
 
     post {
         always {
-                script {
-                    if (fileExists('ci-runtime')) {
-                        dir('ci-runtime') {
-                            sh '''
-                                docker compose ps -a || true
-                                docker compose logs --tail=20 db || true
-                                docker compose down --remove-orphans || true
-                                docker image rm "$IMAGE_REPO:latest" || true
-                                docker builder prune -f || true
-                            '''
-                        }
-                    } else {
-                        sh 'docker image rm "$IMAGE_REPO:latest" || true'
+            script {
+                if (fileExists('ci-runtime')) {
+                    dir('ci-runtime') {
+                        sh '''
+                            docker compose ps -a || true
+                            docker compose logs --tail=20 db || true
+                            docker compose down --remove-orphans || true
+                            docker image rm "$IMAGE_REPO:latest" || true
+                            docker builder prune -f || true
+                        '''
                     }
+                } else {
+                    sh 'docker image rm "$IMAGE_REPO:latest" || true'
                 }
             }
         }
-        success { echo 'Pipeline CI checks passed.' }
-        failure { echo 'Pipeline failed; inspect Console Output.' }
+        success { 
+            echo 'Pipeline CI checks passed.' 
+        }
+        failure { 
+            echo 'Pipeline failed; inspect Console Output.' 
+        }
     }
+}

@@ -91,7 +91,7 @@ pipeline {
 
     post {
         always {
-            node {
+            node('any') {
                 script {
                     if (fileExists('ci-runtime')) {
                         dir('ci-runtime') {

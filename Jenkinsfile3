@@ -70,21 +70,34 @@ pipeline {
                 dir('ci-runtime') {
 
                     sh '''
+                        docker-compose ps
+
+                        APP_PORT=$(docker-compose port eventifyapi 5000 | cut -d: -f2)
+
+                        echo "Detected application port: $APP_PORT"
+
+                        sleep 10
+
                         for i in $(seq 1 20); do
 
-                            if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/ | grep -q "200\\|404\\|302"; then
+                            if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:$APP_PORT/ | grep -q "200\\|404\\|302"; then
                                 echo "HTTP test passed"
-                                break
-                            fi
-
-                            if [ "$i" -eq 20 ]; then
-                                echo "Web application test failed"
-                                exit 1
+                                exit 0
                             fi
 
                             sleep 3
 
                         done
+
+                        echo "Web application test failed"
+
+                        echo "===== EVENTIFY LOGS ====="
+                        docker-compose logs eventifyapi
+
+                        echo "===== DATABASE LOGS ====="
+                        docker-compose logs db
+
+                        exit 1
                     '''
                 }
             }
@@ -120,43 +133,42 @@ pipeline {
 
         always {
 
-            node('built-in') {
+            script {
 
-                script {
+                if (fileExists('ci-runtime')) {
 
-                    if (fileExists('ci-runtime')) {
-
-                        dir('ci-runtime') {
-
-                            sh '''
-                                if command -v docker > /dev/null; then
-
-                                    docker-compose ps -a || true
-
-                                    docker-compose logs --tail=20 db || true
-
-                                    docker-compose down --remove-orphans || true
-
-                                    docker image rm "$IMAGE_REPO:latest" || true
-
-                                    docker builder prune -f || true
-
-                                else
-
-                                    echo "Docker CLI is not installed on this Jenkins node, skipping Docker cleanup."
-
-                                fi
-                            '''
-                        }
-
-                    } else {
+                    dir('ci-runtime') {
 
                         sh '''
                             if command -v docker > /dev/null; then
+
+                                docker-compose ps -a || true
+
+                                docker-compose logs --tail=20 eventifyapi || true
+
+                                docker-compose logs --tail=20 db || true
+
+                                docker-compose down --remove-orphans || true
+
                                 docker image rm "$IMAGE_REPO:latest" || true
+
+                                docker builder prune -f || true
+
+                            else
+
+                                echo "Docker CLI is not installed on this Jenkins node, skipping Docker cleanup."
+
                             fi
                         '''
                     }
+
+                } else {
+
+                    sh '''
+                        if command -v docker > /dev/null; then
+                            docker image rm "$IMAGE_REPO:latest" || true
+                        fi
+                    '''
                 }
             }
         }

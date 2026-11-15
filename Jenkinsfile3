@@ -91,20 +91,28 @@ pipeline {
 
     post {
         always {
-            node('any') {
+            node('built-in') {
                 script {
                     if (fileExists('ci-runtime')) {
                         dir('ci-runtime') {
                             sh '''
-                                docker compose ps -a || true
-                                docker compose logs --tail=20 db || true
-                                docker compose down --remove-orphans || true
-                                docker image rm "$IMAGE_REPO:latest" || true
-                                docker builder prune -f || true
+                                if command -v docker &> /dev/null; then
+                                    docker compose ps -a || true
+                                    docker compose logs --tail=20 db || true
+                                    docker compose down --remove-orphans || true
+                                    docker image rm "$IMAGE_REPO:latest" || true
+                                    docker builder prune -f || true
+                                else
+                                    echo "Docker CLI is not installed on this Jenkins node, skipping Docker cleanup."
+                                fi
                             '''
                         }
                     } else {
-                        sh 'docker image rm "$IMAGE_REPO:latest" || true'
+                        sh '''
+                            if command -v docker &> /dev/null; then
+                                docker image rm "$IMAGE_REPO:latest" || true
+                            fi
+                        '''
                     }
                 }
             }
@@ -116,4 +124,3 @@ pipeline {
             echo 'Pipeline failed; inspect Console Output.' 
         }
     }
-}

@@ -20,7 +20,9 @@ services:
       - db
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     container_name: my-jenkins
     restart: unless-stopped
     ports:

@@ -1,7 +1,10 @@
 pipeline {
     agent any
-    options { skipDefaultCheckout(true) }
-    
+
+    options {
+        skipDefaultCheckout(true)
+    }
+
     environment {
         IMAGE_REPO = 'ejporter/eventifyapi'
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
@@ -9,17 +12,21 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Downloading latest code from GitHub'
-                dir('ci-source') { 
-                    checkout scm 
-                } 
+
+                dir('ci-source') {
+                    checkout scm
+                }
             }
         }
+
         stage('Prepare') {
             steps {
                 echo 'Preparing .NET application for Docker'
+
                 sh '''
                     mkdir -p ci-runtime
                     cp ci-source/Dockerfile ci-runtime/
@@ -28,57 +35,77 @@ pipeline {
                 '''
             }
         }
+
         stage('Build') {
             steps {
                 dir('ci-runtime') {
-                    sh 'docker compose down --remove-orphans || true'
-                    sh 'docker compose build eventifyapi'
-                }
-            }
-        }
-        stage('Run Containers') {
-            steps {
-                dir('ci-runtime') {
+
                     sh '''
-                        docker compose up -d --no-build
-                        docker compose ps -a
+                        docker-compose down --remove-orphans || true
+                    '''
+
+                    sh '''
+                        docker-compose build eventifyapi
                     '''
                 }
             }
         }
+
+        stage('Run Containers') {
+            steps {
+                dir('ci-runtime') {
+
+                    sh '''
+                        docker-compose up -d --no-build
+                        docker-compose ps -a
+                    '''
+                }
+            }
+        }
+
         stage('Testing') {
             steps {
                 echo 'Testing .NET web application endpoint'
+
                 dir('ci-runtime') {
+
                     sh '''
                         for i in $(seq 1 20); do
+
                             if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/ | grep -q "200\\|404\\|302"; then
                                 echo "HTTP test passed"
                                 break
                             fi
+
                             if [ "$i" -eq 20 ]; then
                                 echo "Web application test failed"
                                 exit 1
                             fi
+
                             sleep 3
+
                         done
                     '''
                 }
             }
         }
+
         stage('Push to Docker Hub') {
             steps {
                 dir('ci-runtime') {
+
                     sh '''
                         set +x
 
-                        IMAGE_ID=$(docker compose images -q eventifyapi)
+                        IMAGE_ID=$(docker-compose images -q eventifyapi)
+
                         test -n "$IMAGE_ID"
 
                         docker tag "$IMAGE_ID" "$IMAGE_REPO:latest"
 
                         echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login \
-                            -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
+                            -u "$DOCKERHUB_CREDENTIALS_USR" \
+                            --password-stdin
 
                         docker push "$IMAGE_REPO:latest"
 
@@ -90,26 +117,42 @@ pipeline {
     }
 
     post {
+
         always {
+
             node('built-in') {
+
                 script {
+
                     if (fileExists('ci-runtime')) {
+
                         dir('ci-runtime') {
+
                             sh '''
-                                if command -v docker &> /dev/null; then
-                                    docker compose ps -a || true
-                                    docker compose logs --tail=20 db || true
-                                    docker compose down --remove-orphans || true
+                                if command -v docker > /dev/null; then
+
+                                    docker-compose ps -a || true
+
+                                    docker-compose logs --tail=20 db || true
+
+                                    docker-compose down --remove-orphans || true
+
                                     docker image rm "$IMAGE_REPO:latest" || true
+
                                     docker builder prune -f || true
+
                                 else
+
                                     echo "Docker CLI is not installed on this Jenkins node, skipping Docker cleanup."
+
                                 fi
                             '''
                         }
+
                     } else {
+
                         sh '''
-                            if command -v docker &> /dev/null; then
+                            if command -v docker > /dev/null; then
                                 docker image rm "$IMAGE_REPO:latest" || true
                             fi
                         '''
@@ -117,11 +160,13 @@ pipeline {
                 }
             }
         }
-        success { 
-            echo 'Pipeline CI checks passed.' 
+
+        success {
+            echo 'Pipeline CI checks passed.'
         }
-        failure { 
-            echo 'Pipeline failed; inspect Console Output.' 
+
+        failure {
+            echo 'Pipeline failed; inspect Console Output.'
         }
     }
 }

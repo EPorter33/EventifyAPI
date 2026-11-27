@@ -7,13 +7,13 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourStrong@Password123
     ports:
-      - "1433"
+      - "1433:1433"
     restart: always
 
   eventifyapi:
     build: .
     ports:
-      - "5000"
+      - "5000:80"
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=EventifyDb;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;
     depends_on:
@@ -26,14 +26,11 @@ services:
     container_name: my-jenkins
     restart: unless-stopped
     ports:
-    - "5000:8080"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - jenkins_home:/var/jenkins_home
-      volumes:
-      jenkins_home:
-      sqlserver_data:
-      environment:
+    environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
 
 volumes:
